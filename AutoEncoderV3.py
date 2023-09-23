@@ -210,7 +210,7 @@ class AutoEncoder:
 
             self.loss_graph[epoch] = epoch_loss
 
-            epochs_loss += epoch_loss / len(train_set)
+            epochs_loss += epoch_loss 
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
             
             print(f"Epoch {epoch}, Loss: {epoch_loss:.4f} Avg Loss {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
@@ -259,4 +259,18 @@ decoder = [
 autoencoder = AutoEncoder(encode_layers = encoder, decode_layers = decoder)
 autoencoder.train(train_set)
 
+# %%
+
+def test_helper(autoencoder: AutoEncoder, start_point, end_point):
+    if start_point > end_point:
+        print("Start point must be greater than end point!")
+        return
+
+    for test in range(start_point, end_point + 1):
+        forward_result = autoencoder.forward(test_set[test].reshape(1, 784))
+        preview(test_set[test].reshape(28, 28))
+        preview(forward_result.reshape(28, 28))
+
+def test(start_point, end_point):
+    test_helper(autoencoder, start_point, end_point)
 # %%
