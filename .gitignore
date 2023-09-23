@@ -4,3 +4,4 @@ data
 .vs
 weights
 *.pkl
+mnist_data
