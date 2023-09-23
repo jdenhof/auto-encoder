@@ -1,0 +1,6 @@
+env
+data
+.ipynb_checkpoints
+.vs
+weights
+*.pkl
