@@ -274,3 +274,29 @@ def test_helper(autoencoder: AutoEncoder, start_point, end_point):
 def test(start_point, end_point):
     test_helper(autoencoder, start_point, end_point)
 # %%
+class tester:
+
+    def __init__ (self):
+        self.autoencoder = None
+
+    def test_helper(self, autoencoder: AutoEncoder, start_point, end_point):
+        if start_point > end_point:
+            print("Start point must be greater than end point!")
+            return
+
+        for test in range(start_point, end_point + 1):
+            forward_result = autoencoder.forward(test_set[test].reshape(1, 784))
+            preview(test_set[test].reshape(28, 28))
+            preview(forward_result.reshape(28, 28))
+    
+    def test(self, start_point, end_point):
+        test_helper(autoencoder, start_point, end_point)
+
+    def load_autoencoder(self, dir):
+        if not os.path.exists(dir):
+            print("Path does not exist")
+            return
+        
+        with open(dir, 'rb') as file:
+            self.autoencoder = pickle.load(file)
+    
