@@ -187,7 +187,7 @@ class AutoEncoder:
 
         if self.optimizer == 'MiniBatch':
             if batch_size == 1:
-                print("Warning: You are doinog MiniBatch with a batch_size of 1!")
+                print("Warning: You are doing MiniBatch with a batch_size of 1!")
             self.train_minibatch(train_set, batch_size)
 
         print(f"Error: No optimizer matched {self.optimizer}") 
@@ -199,6 +199,7 @@ class AutoEncoder:
         for epoch in range(self.epochs):
             epoch_loss = 0
             epoch_start = time.time()
+            np.random.shuffle(train_set)
             for input_batch in train_set:
                 # input_batch = train_set[random.randint(0, len(train_set) - 1)]
                 predicted = self.forward(input_batch.reshape(1, -1))
@@ -227,6 +228,7 @@ class AutoEncoder:
         self.batch_size = len(train_batch)
         for epoch in range(self.epochs):
             epoch_start = time.time()
+
             predicted = self.forward(train_batch)
             loss, error_batch = self.loss_function(train_batch, predicted)
 
@@ -257,8 +259,7 @@ class AutoEncoder:
 
                 self.backward(error_batch)
 
-                for layer in self.decoder + self.encoder:
-                    layer.update(self.learning_rate, self.batch_size)
+                self.update_all_layers()
 
                 epoch_loss += loss 
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
