@@ -39,9 +39,9 @@ class LossFunctions:
 
     @staticmethod 
     def MSE(input_batch, predicted):
-        
+
         loss = np.mean(np.square(input_batch - predicted))
-        gradient = predicted - input_batch / np.prod(predicted.shape[:-1])
+        gradient = (predicted - input_batch) # / np.prod(predicted.shape[:-1])
 
         return loss, gradient
     
@@ -59,7 +59,7 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def update(self, learning_rate, batch_size):
+    def update(self, learning_rate):
         pass
 
 class Sigmoid(Layer):
@@ -77,7 +77,7 @@ class Sigmoid(Layer):
 
         return error_batch * self.input_batch * (1 - self.input_batch)
     
-    def update(self, learning_rate, batch_size):
+    def update(self, learning_rate):
         return
     
 class Relu(Layer):
@@ -95,7 +95,7 @@ class Relu(Layer):
 
         return cost_gradient * np.where(self.input_batch > 0, 1, 0)
     
-    def update(self, learning_rate, batch_size):
+    def update(self, learning_rate):
         pass
 
 class Tanh(Layer):
@@ -113,7 +113,7 @@ class Tanh(Layer):
 
         return error_batch * (1 - self.input_batch ** 2)
     
-    def update(self, learning_rate, batch_size):
+    def update(self, learning_rate):
         pass
 
 class LinearLayer(Layer):
@@ -121,21 +121,25 @@ class LinearLayer(Layer):
     def __init__(self, input_size, output_size):
         self.weights = np.random.rand(input_size, output_size) - 0.5
         self.biases = np.zeros(output_size).reshape(1, output_size) - 0.5
+        self.input_size = input_size
+        self.output_size = output_size
 
     def forward(self, input_batch):
         self.input_batch = input_batch
         return np.dot(self.input_batch, self.weights) + self.biases
 
     def backward(self, error_batch):
-        self.error_batch = error_batch
-        self.weights_error = np.dot(self.input_batch.T, error_batch)
-        input_error = np.dot(error_batch, self.weights.T)
-        
-        return input_error
+        batch_size = error_batch.shape[0]
+        self.biases_error = np.sum(error_batch, axis=0) / batch_size
+        weights_result = np.sum(np.einsum('ij,ik->ijk', self.input_batch, error_batch), axis = 0)
+
+        self.weights_error = weights_result / batch_size
+        return np.dot(error_batch, self.weights.T)
     
-    def update(self, learning_rate, batch_size):
-        self.weights -= learning_rate * (np.sum(self.weights_error, axis=0) / batch_size)
-        self.biases -= learning_rate * (np.sum(self.error_batch, axis = 0) / batch_size)
+    def update(self, learning_rate):
+
+        self.weights -= learning_rate * self.weights_error
+        self.biases -= learning_rate * self.biases_error
         
 
 
@@ -179,29 +183,34 @@ class AutoEncoder:
             error_batch = layer.backward(error_batch)
     
     def train(self, train_set, batch_size = 1):
+        trained = False
         if self.optimizer == 'SGD':
             self.train_sgd(train_set)
+            trained = True
         
         if self.optimizer == 'Batch':
             self.train_batch(train_set)
+            trained = True
 
         if self.optimizer == 'MiniBatch':
             if batch_size == 1:
-                print("Warning: You are doing MiniBatch with a batch_size of 1!")
+                print("Warning: Default MiniBatch of size 32 in use.")
+                batch_size = 32
             self.train_minibatch(train_set, batch_size)
+            trained = True
 
-        print(f"Error: No optimizer matched {self.optimizer}") 
+        if not trained:
+            print(f"Error: No optimizer matched {self.optimizer}") 
 
     def train_sgd(self, train_set):
         epochs_time = 0
         epochs_loss = 0
-        self.batch_size = 1
         for epoch in range(self.epochs):
             epoch_loss = 0
             epoch_start = time.time()
-            np.random.shuffle(train_set)
+            # np.random.shuffle(train_set)
             for input_batch in train_set:
-                # input_batch = train_set[random.randint(0, len(train_set) - 1)]
+                # input_batch = train_set[random.randint(0, train_set.shape[0] - 1)]
                 predicted = self.forward(input_batch.reshape(1, -1))
                 loss, error_batch = self.loss_function(input_batch, predicted)
                 epoch_loss += loss
@@ -215,17 +224,19 @@ class AutoEncoder:
             epochs_loss += epoch_loss 
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
             
-            print(f"Epoch {epoch}, Loss: {epoch_loss:.4f} Avg Loss {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
+            print(f"Epoch {epoch}, Loss: {epoch_loss:.4f} Avg Loss/Sample: {epoch_loss / train_set.shape[0]} Avg Loss: {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
             self.display()
 
     def update_all_layers(self):
-        for layer in self.decoder + self.encoder:
-            layer.update(self.learning_rate, self.batch_size)
+        for layer in reversed(self.decoder):
+            layer.update(self.learning_rate)
+        
+        for layer in reversed(self.encoder):
+            layer.update(self.learning_rate)
 
     def train_batch(self, train_batch):
         epochs_loss = 0
         epochs_time = 0
-        self.batch_size = len(train_batch)
         for epoch in range(self.epochs):
             epoch_start = time.time()
 
@@ -240,21 +251,21 @@ class AutoEncoder:
             epochs_loss += loss 
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
         
-            print(f"Epoch {epoch}, Loss: {loss:.4f} Avg Loss {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
+            print(f"Epoch {epoch}, Loss: {loss:.4f} Avg Loss: {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
 
     def train_minibatch(self, train_set, batch_size):
         epochs_loss = 0
         epochs_time = 0
-        self.batch_size = batch_size
-        batches = [train_set[i:i+batch_size] for i in range(0, train_set.shape[0], batch_size)]
         for epoch in range(self.epochs):
             epoch_loss = 0
-            batches = random.shuffle(batches)
+            batches = [train_set[i:i+batch_size] for i in range(0, train_set.shape[0], batch_size)]
+            np.random.shuffle(batches)
+            epoch_start = time.time()
 
-            for train_batch in batches:
-                epoch_start = time.time()
-                predicted = self.forward(train_batch)
+            for step, train_batch in enumerate(batches):
                 
+                predicted = self.forward(train_batch)
+
                 loss, error_batch = self.loss_function(train_batch, predicted)
 
                 self.backward(error_batch)
@@ -262,6 +273,7 @@ class AutoEncoder:
                 self.update_all_layers()
 
                 epoch_loss += loss 
+
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
             
             self.loss_graph[epoch] = epoch_loss
@@ -289,7 +301,7 @@ class AutoEncoder:
     def save(self):
         x = 0
         def dir(x):
-            return f'autoencoder_{self.learning_rate}_{self.epochs}_{x}.pkl'
+            return f'autoencoder_{self.learning_rate}_{self.epochs}_{x}_{self.optimizer}.pkl'
 
         while(os.path.exists(dir(x))):
             x += 1
@@ -308,6 +320,7 @@ class AutoEncoder:
 
 # %%
 autoencoder = AutoEncoder(
+    epochs=5,
     encode_layers = [
         LinearLayer(784, 256),
         Sigmoid(),
@@ -374,5 +387,6 @@ class tester:
             pass
         
         print("Loading autoencoder failed!")
-            
+        
+# %%
 # %%
