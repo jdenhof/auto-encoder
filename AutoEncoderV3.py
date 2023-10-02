@@ -208,9 +208,9 @@ class AutoEncoder:
         for epoch in range(self.epochs):
             epoch_loss = 0
             epoch_start = time.time()
-            # np.random.shuffle(train_set)
+            np.random.shuffle(train_set)
             for input_batch in train_set:
-                # input_batch = train_set[random.randint(0, train_set.shape[0] - 1)]
+                
                 predicted = self.forward(input_batch.reshape(1, -1))
                 loss, error_batch = self.loss_function(input_batch, predicted)
                 epoch_loss += loss
@@ -388,5 +388,4 @@ class tester:
         
         print("Loading autoencoder failed!")
         
-# %%
 # %%
