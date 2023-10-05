@@ -8,10 +8,11 @@ rng = np.random.default_rng()
 
 
 parser = ArgumentParser()
-parser.add_argument( "n_folds", "-k", "--n-folds", type=int )
-parser.add_argument( "n_epochs", "-e", "--n-epochs", type=int )
-parser.add_argument( "n_batch", "-b", "--n-batch", type=int )
+parser.add_argument( "-k", "--n-folds", type=int )
+parser.add_argument( "-e", "--n-epochs", type=int )
+parser.add_argument( "-b", "--n-batch", type=int )
 args = parser.parse_args()
+print( args )
 
 
 # Load MNIST dataset from keras.
@@ -47,6 +48,19 @@ model = AutoEncoder(
 set = np.copy( train_set )
 rng.shuffle( set )
 folds = np.split( set, args.n_folds )
-for f in folds[ 1: ]:
-    model.train_adam( f, args.n_batch )
-model.train_adam( folds[ 0 ], args.n_batch )
+for f in folds:
+    test = f
+    train = list( folds ).remove( f )
+    train_loss = 0.0
+    for set in train:
+        train_loss += model.train_adam( train, args.n_batch )
+    average_loss = train_loss / args.n_folds
+    test_loss = model.train_adam( test, args.n_batch )
+# print(
+# f"""
+# { args.n_folds }-Fold Cross Validation
+#   Average Loss: { average_loss }
+#   Test Loss:    { test_loss }
+  
+# """
+# )

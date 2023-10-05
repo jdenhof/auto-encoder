@@ -287,7 +287,8 @@ class AutoEncoder:
             hours, mins, seconds, epoch_total, avg_time, epochs_time = self.epochtime(epoch, epoch_start, epochs_time)
             
             print(f"Epoch {epoch}, Loss: {epoch_loss:.4f} Avg Loss/Sample: {epoch_loss / train_set.shape[0]} Avg Loss: {epochs_loss / (epoch + 1):.4f} Time: {epoch_total:.2f} Avg Time: {avg_time:.2f} Estimated: {hours}:{mins}:{seconds} ")
-            self.display()
+            # self.display()
+        return epochs_loss
 
     def train_batch(self, train_batch):
         print("Training Gradient Descent")
