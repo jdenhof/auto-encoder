@@ -5,3 +5,6 @@ data
 weights
 *.pkl
 mnist_data
+**/.devcontainer/
+**/.vscode/
+**/__pycache__/
