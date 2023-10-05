@@ -1,35 +1,34 @@
 # %%
 import random
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import time
 import pickle
 import os
 import inspect
-from torchvision import datasets
+# from torchvision import datasets
 
-# Gather MNIST 
-train_set_tensor = datasets.MNIST('./data', train=True, download=True)
-test_set_tensor = datasets.MNIST('./data', train=False, download=True)
-# Convert to numpy
-raw_train_set = train_set_tensor.data.numpy()
-raw_test_set = test_set_tensor.data.numpy()
-# Normalize 
-raw_train_set = raw_train_set / 255.0
-raw_test_set = raw_test_set / 255.0
-# Reshape
-raw_train_set = raw_train_set.reshape(-1, 784)
-raw_test_set = raw_test_set.reshape(-1, 784)
+# # Gather MNIST 
+# train_set_tensor = datasets.MNIST('./data', train=True, download=True)
+# test_set_tensor = datasets.MNIST('./data', train=False, download=True)
+# # Convert to numpy
+# raw_train_set = train_set_tensor.data.numpy()
+# raw_test_set = test_set_tensor.data.numpy()
+# # Normalize 
+# raw_train_set = raw_train_set / 255.0
+# raw_test_set = raw_test_set / 255.0
+# # Reshape
+# raw_train_set = raw_train_set.reshape(-1, 784)
+# raw_test_set = raw_test_set.reshape(-1, 784)
 
-np.random.seed(42)
+# np.random.seed(42)
 
-def preview(image):
-    plt.imshow(image, cmap='gray') 
-    plt.axis('off') 
-    plt.show()
+# def preview(image):
+#     plt.imshow(image, cmap='gray') 
+#     plt.axis('off') 
+#     plt.show()
 
-preview(raw_test_set[0].reshape(28, 28))
+# preview(raw_test_set[0].reshape(28, 28))
 # %%
 from abc import ABC, abstractmethod
 import numpy as np
@@ -372,73 +371,73 @@ class AutoEncoder:
         plt.grid(True)
         plt.show()
 
-# %%
-autoencoder = AutoEncoder(
-    epochs=5,
-    encode_layers = [
-        LinearLayer(784, 256),
-        Sigmoid(),
-        LinearLayer(256, 32),
-        Sigmoid(),
-    ], 
-    decode_layers = [
-        LinearLayer(32, 256),
-        Sigmoid(),
-        LinearLayer(256, 784),
-        Sigmoid()
-    ], 
-    optimizer = 'ADAM')
+# # %%
+# autoencoder = AutoEncoder(
+#     epochs=5,
+#     encode_layers = [
+#         LinearLayer(784, 256),
+#         Sigmoid(),
+#         LinearLayer(256, 32),
+#         Sigmoid(),
+#     ], 
+#     decode_layers = [
+#         LinearLayer(32, 256),
+#         Sigmoid(),
+#         LinearLayer(256, 784),
+#         Sigmoid()
+#     ], 
+#     optimizer = 'ADAM')
 
-autoencoder.train(raw_train_set[:3000])
+# autoencoder.train(raw_train_set[:3000])
 
-# %%
-def test_helper(autoencoder: AutoEncoder, start_point, end_point):
-    if start_point > end_point:
-        print("Start point must be greater than end point!")
-        return
+# # %%
+# def test_helper(autoencoder: AutoEncoder, start_point, end_point):
+#     if start_point > end_point:
+#         print("Start point must be greater than end point!")
+#         return
 
-    for test in range(start_point, end_point + 1):
-        forward_result = autoencoder.forward(raw_test_set[test].reshape(1, 784))
-        preview(raw_test_set[test].reshape(28, 28))
-        preview(forward_result.reshape(28, 28))
+#     for test in range(start_point, end_point + 1):
+#         forward_result = autoencoder.forward(raw_test_set[test].reshape(1, 784))
+#         preview(raw_test_set[test].reshape(28, 28))
+#         preview(forward_result.reshape(28, 28))
 
-def test(start_point, end_point):
-    test_helper(autoencoder, start_point, end_point)
+# def test(start_point, end_point):
+#     test_helper(autoencoder, start_point, end_point)
 
-# %%
-class tester:
+# # %%
+# class tester:
 
-    def __init__ (self):
-        self.autoencoder = None
+#     def __init__ (self):
+#         self.autoencoder = None
 
-    def test_helper(self, autoencoder: AutoEncoder, start_point, end_point):
-        if start_point > end_point:
-            print("Start point must be greater than end point!")
-            return
+#     def test_helper(self, autoencoder: AutoEncoder, start_point, end_point):
+#         if start_point > end_point:
+#             print("Start point must be greater than end point!")
+#             return
 
-        for test in range(start_point, end_point + 1):
-            forward_result = autoencoder.forward(raw_test_set[test].reshape(1, 784))
-            preview(raw_test_set[test].reshape(28, 28))
-            preview(forward_result.reshape(28, 28))
+#         for test in range(start_point, end_point + 1):
+#             forward_result = autoencoder.forward(raw_test_set[test].reshape(1, 784))
+#             preview(raw_test_set[test].reshape(28, 28))
+#             preview(forward_result.reshape(28, 28))
     
-    def test(self, start_point, end_point):
-        test_helper(autoencoder, start_point, end_point)
+#     def test(self, start_point, end_point):
+#         test_helper(autoencoder, start_point, end_point)
 
-    def load_autoencoder(self, dir):
+#     def load_autoencoder(self, dir):
 
-        try:
-            if type(dir) == type(AutoEncoder):
-                self.autoencoder = dir
-        except:
-            pass
+#         try:
+#             if type(dir) == type(AutoEncoder):
+#                 self.autoencoder = dir
+#         except:
+#             pass
 
-        try:
-            if os.path.exists(dir):
-                with open(dir, 'rb') as file:
-                    self.autoencoder = pickle.load(file)
-        except:
-            pass
+#         try:
+#             if os.path.exists(dir):
+#                 with open(dir, 'rb') as file:
+#                     self.autoencoder = pickle.load(file)
+#         except:
+#             pass
         
-        print("Loading autoencoder failed!")
+#         print("Loading autoencoder failed!")
         
 # %%
