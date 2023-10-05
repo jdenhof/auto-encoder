@@ -44,7 +44,7 @@ model = AutoEncoder(
 
 
 # Randomize samples across set and split into k groups.
-set = np.copy( set )
+set = np.copy( train_set )
 rng.shuffle( set )
 folds = np.split( set, args.n_folds )
 for f in folds[ 1: ]:
