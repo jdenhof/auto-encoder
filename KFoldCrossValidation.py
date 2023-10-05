@@ -1,10 +1,17 @@
 import numpy as np
-import random
 from keras.datasets import mnist
 from AutoEncoderV3 import AutoEncoder, LinearLayer, Sigmoid
+from argparse import ArgumentParser
 
 
 rng = np.random.default_rng()
+
+
+parser = ArgumentParser()
+parser.add_argument( "n_folds", "-k", "--n-folds", type=int )
+parser.add_argument( "n_epochs", "-e", "--n-epochs", type=int )
+parser.add_argument( "n_batch", "-b", "--n-batch", type=int )
+args = parser.parse_args()
 
 
 # Load MNIST dataset from keras.
@@ -19,7 +26,7 @@ assert test_set.shape == ( 10000, 784 ), f"{ test_set.shape } != ( 10000, 784 )"
 
 
 model = AutoEncoder(
-    epochs=5,
+    epochs=args.n_epochs,
     optimizer="ADAM",
     encode_layers=[
         LinearLayer( 784, 256 ),
@@ -34,14 +41,12 @@ model = AutoEncoder(
         Sigmoid()
     ]
 )
-def k_fold( k, set ):
-    # Randomize samples across set and split into k groups.
-    set = np.copy( set )
-    rng.shuffle( set )
-    folds = np.split( set, k )
-    for f in folds[ 1: ]:
-        model.train_adam( f, f.shape[ 0 ] / 100 )
 
 
-
-k_fold( 5, train_set )
+# Randomize samples across set and split into k groups.
+set = np.copy( set )
+rng.shuffle( set )
+folds = np.split( set, args.n_folds )
+for f in folds[ 1: ]:
+    model.train_adam( f, args.n_batch )
+model.train_adam( folds[ 0 ], args.n_batch )
