@@ -277,7 +277,8 @@ class AutoEncoder:
             epoch_start = time.time()
             np.random.shuffle(train_set)
             batches = [train_set[i:i+batch_size] for i in range(0, train_set.shape[0], batch_size)]
-            for train_batch in batches:
+            for i, train_batch in enumerate( batches ):
+                print( f"Batch { i + 1 }/{ len( batches ) }", end="\r" )
                 epoch_loss += self.train_helper(train_batch)
                 self.update_all_layers()
 
