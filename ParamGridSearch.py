@@ -15,7 +15,7 @@ def get_layers():
     n_hidden = random.randrange( 1, 10, 2 )
     layer_sizes = [
         784,
-        *[ random.choice( [ random.choice( [ 16, 32, 64, 128, 256, 512 ] ) ] ) for _ in range( n_hidden ) ],
+        *[ random.choice( [ 16, 32, 64, 128, 256, 512 ] ) for _ in range( n_hidden ) ],
         784
     ]
     n_layers = n_hidden + 2
