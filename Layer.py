@@ -32,6 +32,9 @@ class Sigmoid(Layer):
             print("Error: result is none")
 
         return error_batch * self.input_batch * (1 - self.input_batch)
+    
+    def update( self, learning_rate, optimizer ):
+        pass
 
 
 
@@ -48,6 +51,9 @@ class Relu(Layer):
             print("Error: result is none")
 
         return cost_gradient * np.where(self.input_batch > 0, 1, 0)
+    
+    def update( self, learning_rate, optimizer ):
+        pass
 
 
 
@@ -64,6 +70,9 @@ class Tanh(Layer):
             print("Error: result is none")
 
         return error_batch * (1 - self.input_batch ** 2)
+    
+    def update( self, learning_rate, optimizer ):
+        pass
 
 
 

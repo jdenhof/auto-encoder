@@ -14,7 +14,7 @@ class Trainer:
         self.loss_graph = [ None ] * n_epochs
 
     def train( self, train_set, batch_size=32 ):
-        if self.optimizer == "minibatch" | self.optimizer == "ADAM":
+        if self.optimizer == "minibatch" or self.optimizer == "ADAM":
             assert batch_size > 1, f"Batch size [ { batch_size } ] must be > 1."
             assert log2( batch_size ).is_integer(), f"Batch size [ { batch_size } ] must be an power of 2."
         total_loss = 0.0
@@ -75,7 +75,7 @@ class Trainer:
     
     def propagate( self, sample ):
         output = self.model.forward( sample )
-        loss, gradient = self.loss_function( output, sample )
+        loss = self.loss_function( output, sample )
         gradient = output - sample
         self.model.backward( gradient )
         return loss

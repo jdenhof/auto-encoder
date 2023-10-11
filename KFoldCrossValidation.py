@@ -1,6 +1,9 @@
 import numpy as np
 from keras.datasets import mnist
-from AutoEncoderV3 import AutoEncoder, LinearLayer, Sigmoid
+from AutoEncoderV3 import AutoEncoder
+from Layer import LinearLayer, Sigmoid
+from Trainer import Trainer
+from LossFunctions import MSE
 from argparse import ArgumentParser
 
 
@@ -41,8 +44,6 @@ for i, fold in enumerate( folds ):
     train.remove( fold )
     train_loss = 0.0
     model = AutoEncoder(
-        epochs=n_epochs,
-        optimizer="ADAM",
         encode_layers=[
             LinearLayer( 784, 256 ),
             Sigmoid(),
@@ -56,10 +57,11 @@ for i, fold in enumerate( folds ):
             Sigmoid()
         ]
     )
+    trainer = Trainer( model, MSE, "ADAM" )
     for set in train:
-        train_loss += model.train_adam( set, n_batch )
+        train_loss += trainer.train( set, n_batch )
     average_loss = train_loss / n_folds
-    test_loss = model.train_adam( test, n_batch )
+    test_loss = trainer.train( test, n_batch )
     print(
 f"""
   Fold { i }:
