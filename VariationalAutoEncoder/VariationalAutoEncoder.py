@@ -13,6 +13,9 @@ class Model:
         reconstruction_alpha : 0 = reconstruction_loss | 1 = kl_div | 0.5 = reconstruction_loss + kl_div
         loss_function : NN.LossFunctions.{lossfunction} ex. NN.LossFunctions.MSE
         """
+
+        self.__init__errors();
+
         self.encoder = encoder
         self.decoder = decoder
         self.optimizer = optimizer
@@ -37,6 +40,53 @@ class Model:
             NN.Sequential(NN.LinearLayer(latent_size, latent_size))
         )
 
+    def __init__errors(encoder, decoder, epochs, reconstruction_alpha, learning_rate, optimizer, loss_function):
+        try:
+            assert type(encoder) == NN.Sequential
+        except:
+            print("Encoder must be of type NN.Sequential")
+            exit(1)
+        
+        try:
+            assert type(decoder) == NN.Sequential
+        except:
+            print("Decoder must be of type NN.Sequential")
+            exit(1)
+
+        try:
+            assert type(epochs) == int
+        except:
+            print("Epochs must be of int")
+            exit(1)
+
+        try:
+            assert type(reconstruction_alpha) == float
+        except:
+            print("Reconstruciton Alpha must be of float")
+            exit(1)
+        
+        try:
+            assert type(learning_rate) == float
+        except:
+            print("Learning rate must be of type float")
+            exit(1)
+
+        try:
+            assert type(optimizer) == str
+            optimizer = optimizer.lower()
+            assert optimizer == "minibatch" or  optimizer == "adam" or optimizer == "sgd" or optimizer == "batch"
+        except:
+            print("Optimizer must be of MiniBatch or ADAM or SGD or Batch")
+            exit(1)
+
+        try:
+            assert type(loss_function) == NN.LossFunctions.MSE
+            optimizer = optimizer.lower()
+            assert optimizer == "minibatch" or  optimizer == "adam" or optimizer == "sgd" or optimizer == "batch"
+        except:
+            print("Optimizer must be of MiniBatch or ADAM or SGD or Batch")
+            exit(1)
+        
     def encode(self, input):
         input = self.encoder(input)
         z_mean, z_log_var = self.variational_layers(input)
@@ -109,8 +159,8 @@ class Model:
                 self.encoder.update(self.learning_rate, self.optimizer)
                 self.decoder.update(self.learning_rate, self.optimizer)
 
-            self.loss_graph[epoch] = epoch_loss
             epoch_loss = epoch_loss / len(batches)
+            self.loss_graph[epoch] = epoch_loss
             epochs_loss += epoch_loss
 
             print(f"Epoch: {epoch + 1} Loss: {epoch_loss} Avg Loss/Epoch: {epochs_loss/ (epoch + 1)}")
