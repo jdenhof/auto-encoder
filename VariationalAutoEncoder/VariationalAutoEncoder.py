@@ -126,20 +126,24 @@ class Model:
         plt.title('Loss Per Epoch')
         plt.grid(True)
         plt.show()
+        
+class Encoder(NN.Sequential):
+    def __init__ (self):
+        super().__init__(
+            NN.LinearLayer(784, 256),
+            NN.Sigmoid(),
+            NN.LinearLayer(256, 32),
+            NN.Sigmoid()
+        )
 
-    encoder_model = NN.Sequential(
-        NN.LinearLayer(784, 256),
-        NN.Sigmoid(),
-        NN.LinearLayer(256, 32),
-        NN.Sigmoid()
-    )   
-
-    decoder_model = NN.Sequential(
-        NN.LinearLayer(32, 256),
-        NN.Sigmoid(),
-        NN.LinearLayer(256, 784),
-        NN.Sigmoid()
-    )
+class Decoder(NN.Sequential):
+    def __init__ (self):
+        super().__init__(
+            NN.LinearLayer(32, 256),
+            NN.Sigmoid(),
+            NN.LinearLayer(256, 784),
+            NN.Sigmoid()
+        )
 
 class Tester:
 
