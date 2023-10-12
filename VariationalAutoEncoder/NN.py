@@ -211,17 +211,14 @@ class MNIST:
 
     @staticmethod
 
-    def get_data(dir = None):
+    def get_data(dir):
         """
         Defaults to not download data, set dir to the directory to store MNSIT
         """
-        if not (type(dir) == str):
-            # Gather MNIST 
-            train_set_tensor = datasets.MNIST('./', train=True, download=False)
-            test_set_tensor = datasets.MNIST('./', train=False, download=False)
-        else:
-            train_set_tensor = datasets.MNIST(dir, train=True, download=True)
-            test_set_tensor = datasets.MNIST(dir, train=False, download=True)
+
+        train_set_tensor = datasets.MNIST(dir, train=True, download=True)
+        test_set_tensor = datasets.MNIST(dir, train=False, download=True)
+
         # Convert to numpy
         raw_train_set = train_set_tensor.data.numpy()
         raw_test_set = test_set_tensor.data.numpy()
