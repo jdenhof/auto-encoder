@@ -137,7 +137,7 @@ class LinearLayer(Layer):
 
         return np.dot(error_batch, self.weights.T)
     
-    def update(self, learning_rate, optimizer):
+    def update(self, learning_rate, optimizer):     
 
         if optimizer == 'ADAM':
             self.update_adam(learning_rate)
