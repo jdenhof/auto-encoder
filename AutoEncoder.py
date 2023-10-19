@@ -1,4 +1,5 @@
 from Layer import Layer
+from numpy import ndarray
 
 
 class AutoEncoder:
@@ -10,16 +11,14 @@ class AutoEncoder:
         self.encoder = encoder_layers
         self.decoder = decoder_layers
     
-    def forward( self, input ):
-        print( f"AutoEncoder::forward input type = { type( input ) }" )
+    def forward( self, input: ndarray ):
         for layer in self.encoder:
             input = layer.forward( input )
         for layer in self.decoder:
             input = layer.forward( input )
         return input
     
-    def backward( self, error ):
-        print( f"AutoEncoder::backward input type = { type( input ) }" )
+    def backward( self, error: ndarray ):
         for layer in reversed( self.decoder ):
             error = layer.backward( error )
         for layer in reversed( self.encoder ):

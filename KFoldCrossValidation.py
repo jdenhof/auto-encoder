@@ -44,13 +44,13 @@ for i, fold in enumerate( folds ):
     train.remove( fold )
     train_loss = 0.0
     model = AutoEncoder(
-        encode_layers=[
+        encoder_layers=[
             LinearLayer( 784, 256 ),
             Sigmoid(),
             LinearLayer( 256, 32 ),
             Sigmoid()
         ],
-        decode_layers=[
+        decoder_layers=[
             LinearLayer( 32, 256 ),
             Sigmoid(),
             LinearLayer( 256, 784 ),
