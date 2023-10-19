@@ -1,6 +1,6 @@
 import numpy as np
 from keras.datasets import mnist
-from AutoEncoderV3 import AutoEncoder
+from AutoEncoder import AutoEncoder
 from Layer import LinearLayer, Sigmoid
 from Trainer import Trainer
 from LossFunctions import MSE

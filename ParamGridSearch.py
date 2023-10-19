@@ -1,5 +1,5 @@
 import random
-from AutoEncoderV3 import AutoEncoder, LinearLayer, Sigmoid
+from AutoEncoder import AutoEncoder, LinearLayer, Sigmoid
 
 
 def rand_learning_rate():

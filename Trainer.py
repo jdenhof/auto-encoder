@@ -1,6 +1,6 @@
 import numpy as np
 from math import log2
-from AutoEncoderV3 import AutoEncoder
+from AutoEncoder import AutoEncoder
 
 
 
