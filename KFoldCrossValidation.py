@@ -34,39 +34,81 @@ assert test_set.shape == ( 10000, 784 ), f"{ test_set.shape } != ( 10000, 784 )"
 print( f"{ n_folds }-Fold Cross Validation" )
 
 
-# Randomize samples across set and split into k groups.
-set = np.copy( train_set )
-rng.shuffle( set )
-folds = np.split( set, n_folds )
-for i, fold in enumerate( folds ):
-    test = fold
-    train = folds.copy()
-    train.remove( fold )
-    train_loss = 0.0
-    model = AutoEncoder(
-        encoder_layers=[
-            LinearLayer( 784, 256 ),
-            Sigmoid(),
-            LinearLayer( 256, 32 ),
-            Sigmoid()
-        ],
-        decoder_layers=[
-            LinearLayer( 32, 256 ),
-            Sigmoid(),
-            LinearLayer( 256, 784 ),
-            Sigmoid()
-        ]
-    )
-    trainer = Trainer( model, MSE, "ADAM" )
-    for set in train:
-        train_loss += trainer.train( set, n_batch )
-    average_loss = train_loss / n_folds
-    test_loss = trainer.train( test, n_batch )
-    print(
+def kfold( set, trainer, k=5 ):
+    set = np.copy( set )
+    rng.shuffle( set )
+    folds = np.split( set, k )
+    for i, fold in enumerate( folds ):
+        train = folds.copy()
+        train.remove( fold )
+        train_loss = 0.0
+        for set in train:
+            train_loss += trainer.train( set, n_batch )
+        average_loss = train_loss / k
+        test_loss = trainer.train( fold, n_batch )
+        print(
 f"""
-  Fold { i }:
+  Fold { 1 }:
     Loss:
-      Average:  { average_loss }
-      Test Set: { test_loss }
+      Average:  { 2 }
+      Test Set: { 3 }
 """
-    )
+        )
+
+
+model = AutoEncoder(
+    encoder_layers=[
+        LinearLayer( 784, 256 ),
+        Sigmoid(),
+        LinearLayer( 256, 32 ),
+        Sigmoid()
+    ],
+    decoder_layers=[
+        LinearLayer( 32, 256 ),
+        Sigmoid(),
+        LinearLayer( 256, 784 ),
+        Sigmoid()
+    ]
+)
+
+kfold(
+    set = train_set,
+    trainer = Trainer( model, MSE, "ADAM" )
+)
+
+# # Randomize samples across set and split into k groups.
+# set = np.copy( train_set )
+# rng.shuffle( set )
+# folds = np.split( set, n_folds )
+# for i, fold in enumerate( folds ):
+#     test = fold
+#     train = folds.copy()
+#     train.remove( fold )
+#     train_loss = 0.0
+#     model = AutoEncoder(
+#         encoder_layers=[
+#             LinearLayer( 784, 256 ),
+#             Sigmoid(),
+#             LinearLayer( 256, 32 ),
+#             Sigmoid()
+#         ],
+#         decoder_layers=[
+#             LinearLayer( 32, 256 ),
+#             Sigmoid(),
+#             LinearLayer( 256, 784 ),
+#             Sigmoid()
+#         ]
+#     )
+#     trainer = Trainer( model, MSE, "ADAM" )
+#     for set in train:
+#         train_loss += trainer.train( set, n_batch )
+#     average_loss = train_loss / n_folds
+#     test_loss = trainer.train( test, n_batch )
+#     print(
+# f"""
+#   Fold { i }:
+#     Loss:
+#       Average:  { average_loss }
+#       Test Set: { test_loss }
+# """
+#     )
