@@ -7,7 +7,9 @@ from LossFunctions import MSE
 from argparse import ArgumentParser
 
 
+
 rng = np.random.default_rng()
+
 
 
 parser = ArgumentParser()
@@ -20,6 +22,7 @@ n_epochs = args.n_epochs or 10
 n_folds = args.n_folds or 5
 
 
+
 # Load MNIST dataset from keras.
 def fix( set ):
     return set.reshape( -1, set.shape[ 1 ]**2 )
@@ -30,32 +33,29 @@ train_set, test_set = load_MNIST()
 assert train_set.shape == ( 60000, 784 ), f"{ train_set.shape } != ( 60000, 784 )"
 assert test_set.shape == ( 10000, 784 ), f"{ test_set.shape } != ( 10000, 784 )"
 
+train_set = train_set[ :500 ]
 
-print( f"{ n_folds }-Fold Cross Validation" )
-
-
-def kfold( set, trainer, k=5 ):
+from copy import deepcopy
+def kfold( set, trainer: Trainer, k=5 ):
+    print( f"{ k }-Fold Cross Validation" )
     set = np.copy( set )
     rng.shuffle( set )
     folds = np.split( set, k )
+    loss_hists = []
+    test_losses = []
     for i, fold in enumerate( folds ):
-        train = folds.copy()
-        train.remove( fold )
-        train_loss = 0.0
-        for set in train:
-            train_loss += trainer.train( set, n_batch )
-        average_loss = train_loss / k
-        test_loss = trainer.train( fold, n_batch )
-        print(
-f"""
-  Fold { i }:
-    Loss:
-      Average:  { average_loss }
-      Test Set: { test_loss }
-"""
-        )
+        print( f"  Fold { i }" )
+        # train_sets = deepcopy( folds )
+        train_sets = np.array( folds )
+        train_sets = np.delete( train_sets, i, 0 )
+        trainer_copy = deepcopy( trainer )
+        loss_hist = [ trainer_copy.train( set, n_batch ) for set in train_sets ]
+        loss_hists.append( loss_hist )
+        test_loss = trainer_copy.train( fold, n_batch )
+        test_losses.append( test_loss )
+    return loss_hists, test_losses
 
-kfold(
+train_history, test_losses = kfold(
     set = train_set,
     trainer = Trainer( AutoEncoder(
         encoder_layers=[
@@ -70,42 +70,14 @@ kfold(
             LinearLayer( 256, 784 ),
             Sigmoid()
         ]
-    ), MSE, "ADAM" )
+    ), MSE, "ADAM", n_epochs=1 ),
+    k=5
 )
 
-# # Randomize samples across set and split into k groups.
-# set = np.copy( train_set )
-# rng.shuffle( set )
-# folds = np.split( set, n_folds )
-# for i, fold in enumerate( folds ):
-#     test = fold
-#     train = folds.copy()
-#     train.remove( fold )
-#     train_loss = 0.0
-#     model = AutoEncoder(
-#         encoder_layers=[
-#             LinearLayer( 784, 256 ),
-#             Sigmoid(),
-#             LinearLayer( 256, 32 ),
-#             Sigmoid()
-#         ],
-#         decoder_layers=[
-#             LinearLayer( 32, 256 ),
-#             Sigmoid(),
-#             LinearLayer( 256, 784 ),
-#             Sigmoid()
-#         ]
-#     )
-#     trainer = Trainer( model, MSE, "ADAM" )
-#     for set in train:
-#         train_loss += trainer.train( set, n_batch )
-#     average_loss = train_loss / n_folds
-#     test_loss = trainer.train( test, n_batch )
-#     print(
-# f"""
-#   Fold { i }:
-#     Loss:
-#       Average:  { average_loss }
-#       Test Set: { test_loss }
-# """
-#     )
+from matplotlib import pyplot as plt
+for hist in train_history:
+    plt.plot( range( len( hist ) ), hist )
+plt.xlabel( "K" )
+plt.ylabel( "Loss" )
+plt.title( f"{ 5 }-Fold Cross Validation" )
+plt.savefig( "KFoldLossGraph.png" )
