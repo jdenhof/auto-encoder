@@ -48,32 +48,29 @@ def kfold( set, trainer, k=5 ):
         test_loss = trainer.train( fold, n_batch )
         print(
 f"""
-  Fold { 1 }:
+  Fold { i }:
     Loss:
-      Average:  { 2 }
-      Test Set: { 3 }
+      Average:  { average_loss }
+      Test Set: { test_loss }
 """
         )
 
-
-model = AutoEncoder(
-    encoder_layers=[
-        LinearLayer( 784, 256 ),
-        Sigmoid(),
-        LinearLayer( 256, 32 ),
-        Sigmoid()
-    ],
-    decoder_layers=[
-        LinearLayer( 32, 256 ),
-        Sigmoid(),
-        LinearLayer( 256, 784 ),
-        Sigmoid()
-    ]
-)
-
 kfold(
     set = train_set,
-    trainer = Trainer( model, MSE, "ADAM" )
+    trainer = Trainer( AutoEncoder(
+        encoder_layers=[
+            LinearLayer( 784, 256 ),
+            Sigmoid(),
+            LinearLayer( 256, 32 ),
+            Sigmoid()
+        ],
+        decoder_layers=[
+            LinearLayer( 32, 256 ),
+            Sigmoid(),
+            LinearLayer( 256, 784 ),
+            Sigmoid()
+        ]
+    ), MSE, "ADAM" )
 )
 
 # # Randomize samples across set and split into k groups.
