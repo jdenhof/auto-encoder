@@ -8,3 +8,4 @@ mnist_data
 **/.devcontainer/
 **/.vscode/
 **/__pycache__/
+**/KFoldLossGraph.png
