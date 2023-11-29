@@ -13,5 +13,6 @@ The repository is organized as follows:
 - `autoencoder`: In this directory, you'll find the implementation of an autoencoder, a neural network used for unsupervised learning tasks such as dimensionality reduction and feature extraction.
 
 - `variational_autoencoder`: This directory houses the implementation of a variational autoencoder (VAE). A VAE is a generative model used for generating data and exploring latent spaces.
+  - This repository is currently being worked on and is open to improvements
 
 
